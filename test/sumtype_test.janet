@@ -22,12 +22,14 @@
   (assert (= c 1))
 
   (match v0
-    {:just x} (printf "v0: %d" x)
-    {:nothing _} (print "v0: <nothing>"))
+    [:just x] (set c 10)
+    [:nothing] (set c 20))
+  (assert (= c 20))
 
   (match v1
-    {:just x} (printf "v1: %d" x)
-    {:nothing _} (print "v1: <nothing>"))
+    [:just x] (set c 11)
+    [:nothing] (set c 21))
+  (assert (= c 11))
   )
 
 (do
@@ -45,11 +47,14 @@
   (assert (true? (err? v0)))
   (assert (true? (ok? v1)))
 
+  (var c 0)
   (defn do-stuff [i r]
     (match r
-      {:ok v} (print (string "OK: " i " " v))
-      {:err e} (print (string "ERR: " i " " e))))
+      [:ok v] (set c 11)
+      [:err e] (set c 22)))
 
   (do-stuff "v0" v0)
+  (assert (= c 22))
   (do-stuff "v1" v1)
+  (assert (= c 11))
   )

@@ -8,20 +8,22 @@
     (if (nil? arg)
       (array/push bindings
                   ~(defn ,name []
-                     {:type ',type-name ,(keyword name) :void}))
+                     [,(keyword name) nil :type ',type-name]))
       (array/push bindings
                   ~(defn ,name [a]
                      (when (nil? a)
                        (error "A sum type with value requires a non-nil argument."))
-                     {:type ',type-name ,(keyword name) a})))
+                     [,(keyword name) a :type ',type-name ])))
 
     (array/push bindings
                 ~(defn ,(symbol (string name) "?") [a]
-                   (not (nil? (get a ,(keyword name)))))))
+                   (= ,(keyword name) (get a 0)))))
 
   (array/push bindings ~(defn ,(symbol (string type-name) "?") [a]
-                          (= ',type-name (get a :type))))
+                          (= ',type-name (get a 3))))
   bindings)
 
 (defn isa? [type instance]
-  (= type (get instance :type)))
+  (and
+    (= :type (get instance 2))
+    (= type (get instance 3))))
