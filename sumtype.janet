@@ -5,17 +5,18 @@
   (def bindings @[])
   (each form forms
     (def name (in form 0))
-    (def arg (get form 1))
+    (def args (array/slice form 1))
 
-    (if (nil? arg)
+    (if (= 0 (length args))
       (array/push bindings
                   ~(defn ,name []
                      [,(keyword name) nil :type ',type]))
       (array/push bindings
-                  ~(defn ,name [a]
-                     (when (nil? a)
-                       (error "A sum type with value requires a non-nil argument."))
-                     [,(keyword name) a :type ',type ])))
+                  ~(defn ,name [& stuff]
+                     (each item stuff
+                       (when (nil? item)
+                         (error "A sum type with value(s) requires a non-nil argument.")))
+                     [,(keyword name) ;stuff :type ',type ])))
 
     (array/push bindings
                 ~(defn ,(symbol (string name) "?") [a]

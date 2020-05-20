@@ -65,3 +65,29 @@
   (do-stuff "v1" v1)
   (assert (= c 11))
   )
+
+(do
+  (sumtype/declare
+   tree
+   [leaf]
+   [node v left right])
+
+  (def my-tree
+    (node
+     1 (node
+        2 (node
+           3 (leaf) (node 4 (leaf) (leaf)))
+        (leaf))))
+
+  (defn walk [tree func]
+    (match tree
+      [:leaf] nil
+      [:node v left right] (do
+                             (func v)
+                             (walk left func)
+                             (walk right func))))
+
+  (var acc @[])
+  (walk my-tree (fn [a] (array/push acc a)))
+  (assert (deep= acc @[1 2 3 4]))
+  )
