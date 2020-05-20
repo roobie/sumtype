@@ -1,4 +1,5 @@
-(import sumtype)
+(import ../sumtype)
+
 (do
   (sumtype/declare maybe
                    [just a]
@@ -14,22 +15,28 @@
   (assert (true? (nothing? v0)))
   (assert (true? (just? v1)))
 
-  (var c 0)
-  (try
-    (just nil) # should signal an error
-    ((err)
-     (set c 1)))
-  (assert (= c 1))
+  (def [ok err] (protect
+                 (just nil))) # should signal an error
+  (assert (not ok))
 
-  (match v0
-    [:just x] (set c 10)
-    [:nothing] (set c 20))
-  (assert (= c 20))
+  (assert (match v0
+            [:just x] (error "unreachable")
+            [:nothing] :ok))
 
-  (match v1
-    [:just x] (set c 11)
-    [:nothing] (set c 21))
-  (assert (= c 11))
+  (assert (match v1
+            [:just x] :ok
+            [:nothing] (error "unreachable")))
+
+  (defn maybe-map [m f]
+    (match m
+      [:just x] (just (f x))
+      [:nothing] (nothing)))
+
+  (-> (just 1)
+      (maybe-map (fn [n] (+ n 1)))
+      (match [:just x] x)
+      (= 2)
+      (assert "should have been incremented"))
   )
 
 (do

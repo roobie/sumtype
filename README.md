@@ -5,36 +5,40 @@ A macro for Janet for creating sum types
 
 ```janet
 (import sumtype)
-
-# Create the maybe sum type, of which instances can be either
-# just <a value>, or
-# nothing
 (sumtype/declare maybe
-                 [just a]
-                 [nothing])
+                  [just a]
+                  [nothing])
 
 (def v0 (nothing))
 (def v1 (just 1))
+
+# (pp v0)
+# (pp v1)
 
 (assert (true? (maybe? v0)))
 (assert (true? (nothing? v0)))
 (assert (true? (just? v1)))
 
-# Sum types that boxes a value requires a non-nil argument
-(var c 0)
-(try
-  (just nil) # should signal an error
-  ((err)
-    (set c 1)))
-(assert (= c 1))
+(def [ok err] (protect
+                (just nil))) # should signal an error
+(assert (not ok))
 
-# We can pattern match to determine what to do
-(match v0 # is nothing, so will print "v0: <nothing>"
-  {:just x} (printf "v0: %d" x)
-  {:nothing _} (print "v0: <nothing>"))
+(assert (match v0
+          [:just x] (error "unreachable")
+          [:nothing] :ok))
 
-# v1 is just a, so will print "v1: 1"
-(match v1
-  {:just x} (printf "v1: %d" x)
-  {:nothing _} (print "v1: <nothing>"))
+(assert (match v1
+          [:just x] :ok
+          [:nothing] (error "unreachable")))
+
+(defn maybe-map [m f]
+  (match m
+    [:just x] (just (f x))
+    [:nothing] (nothing)))
+
+(-> (just 1)
+    (maybe-map (fn [n] (+ n 1)))
+    (match [:just x] x)
+    (= 2)
+    (assert "should have been incremented"))
 ```
