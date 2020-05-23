@@ -5,11 +5,8 @@
                    [just a]
                    [nothing])
 
-  (def v0 (nothing))
+  (def v0 nothing)
   (def v1 (just 1))
-
-  # (pp v0)
-  # (pp v1)
 
   (assert (true? (maybe? v0)))
   (assert (true? (nothing? v0)))
@@ -76,8 +73,10 @@
     (node
      1 (node
         2 (node
-           3 (leaf) (node 4 (leaf) (leaf)))
-        (leaf))))
+           3 leaf (node 4 leaf leaf))
+        leaf)))
+
+  (printf "%N" my-tree)
 
   (defn walk [tree func]
     (match tree
