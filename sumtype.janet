@@ -9,8 +9,8 @@
 
     (if (= 0 (length args))
       (array/push bindings
-                  ~(defn ,name []
-                     [,(keyword name) nil :type ',type]))
+                  ~(def ,name
+                     [,(keyword name) :type ',type]))
       (array/push bindings
                   ~(defn ,name [& stuff]
                      (each item stuff
@@ -23,7 +23,7 @@
                    (= ,(keyword name) (get a 0)))))
 
   (array/push bindings ~(defn ,(symbol (string type) "?") [a]
-                          (= ',type (get a 3))))
+                          (= ',type (last a))))
   bindings)
 
 (defn isa? [type instance]
